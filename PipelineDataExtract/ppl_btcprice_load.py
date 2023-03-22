@@ -1,7 +1,8 @@
-import os
 import requests
 import mysql.connector
 import json
+import pandas as pd
+from datetime import datetime
 
 
 # Open the file for reading
@@ -13,8 +14,13 @@ with open('../credentials.json', 'r') as f:
 username = contents['DB_USER']
 password = contents['DB_PASSWORD']
 dbname   = contents['DB_NAME']
+coingecko_api_root = contents['COINGECKO_API_ROOT']
 
 
+date='21-03-2023'
+api_endpoint = coingecko_api_root+'coins/bitcoin/history?date=[[date]]&localization=false'
+
+#DB connection
 mydb = mysql.connector.connect(
   host="localhost",
   user=username,
@@ -22,12 +28,31 @@ mydb = mysql.connector.connect(
   database=dbname
 )
 
-response = requests.get('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd')
-bitcoin_price = response.json()['bitcoin']['usd']
 
+def get_api_price_history(date,api_endpoint):
+    response = requests.get(api_endpoint.replace("[[date]]", date))
+    return response.json()
+
+def insert_btc_price_history(currency,date,api_endpoint):
+    data =get_api_price_history(date,api_endpoint)
+    price = data['market_data']['current_price'][currency]
+    df = pd.DataFrame(columns=["date", "price", "currency","api_url"])
+    df = df.append({"Date": date, "Price": price, "Currency": currency,"api_url":api_endpoint.replace("[[date]]", date)}, ignore_index=True)
+    return df
+
+
+#data = get_api_price_history(date,api_endpoint)
+df = insert_btc_price_history('usd',date,api_endpoint)
+
+test= df["Price"].values[0]
 
 mycursor = mydb.cursor()
-sql = "INSERT INTO BTCPrice (price) VALUES (%s)"
-val = (bitcoin_price,)
-mycursor.execute(sql, val)
+sql = "INSERT INTO BTCPrice (date,price,currency,api_url) VALUES (%s,%s,%s,%s)"
+#val = (test,)
+mycursor.execute(sql, (datetime.strptime(df["Date"].values[0], '%d-%m-%Y').date(),test,df["Currency"].values[0],df["api_url"].values[0],))
 mydb.commit()
+
+
+mydb.close()
+
+

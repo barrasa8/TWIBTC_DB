@@ -23,7 +23,7 @@
 	</schema>
 	<connector name="MySql" database="MySql" driver_class="com.mysql.cj.jdbc.Driver" driver_jar="mysql-connector-j-8.0.31.jar" driver_desc="Standard" host="localhost" port="3306" user="root" passwd="NDQ3NjgzMjM=" useSystemProxy="false" />
 	<layout name="Main Layout" id="Layout-2309" show_relation="columns" >
-		<entity schema="btc_db" name="BTCPrice" color="3986C1" x="48" y="176" />
+		<entity schema="btc_db" name="BTCPrice" color="3986C1" x="64" y="176" />
 		<callout x="48" y="48" pointer="Round" >
 			<comment><![CDATA[This is a layout. 
 - Double-click table headers, columns, or foreign keys to edit 
@@ -38,8 +38,16 @@
 FROM
 	btc_db.`BTCPrice` e;]]></string>
 		</script>
+		<query id="Query-25cd" name="BTCPrice_002" >
+			<query_table schema="btc_db" name="BTCPrice" alias="b" x="48" y="48" >
+				<column name="BTCPriceID" />
+				<column name="Date" />
+				<column name="Price" />
+				<column name="currency" />
+			</query_table>
+		</query>
 	</layout>
-	<layout name="~Layout with Sample Tools" id="Layout-134" show_column_type="y" show_relation="columns" >
+	<layout name="~Layout with Sample Tools" id="Layout-134" confirmed="y" show_column_type="y" show_relation="columns" >
 		<entity schema="btc_db" name="BTCPrice" color="3986C1" x="48" y="80" />
 		<entity schema="btc_db" name="test_tbl" color="C1D8EE" x="384" y="48" />
 		<script name="SQL Editor" id="Editor-4c9" language="SQL" >
@@ -68,8 +76,8 @@ FROM
 					<form_script type="DataSource" language="SQL" >
 						<var name="BTCPriceID" type="4" />
 						<var name="Date" type="93" />
-						<var name="Price" />
-						<var name="currency" />
+						<var name="Price" type="-1" />
+						<var name="currency" type="-1" />
 						<script ><![CDATA[SELECT * FROM btc_db.`BTCPrice`]]></script>
 					</form_script>
 					<param name="i0" value="Price" />
@@ -82,8 +90,8 @@ FROM
 					<form_script type="DataSource" language="SQL" >
 						<var name="BTCPriceID" type="4" />
 						<var name="Date" type="93" />
-						<var name="Price" />
-						<var name="currency" />
+						<var name="Price" type="-1" />
+						<var name="currency" type="-1" />
 						<script ><![CDATA[SELECT * FROM btc_db.`BTCPrice`]]></script>
 					</form_script>
 					<cell type="label" name="BTCPriceID" pos="0,0,0,0,c,c" />
