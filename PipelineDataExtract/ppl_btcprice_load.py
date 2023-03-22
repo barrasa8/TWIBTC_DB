@@ -2,7 +2,8 @@ import requests
 import mysql.connector
 import json
 import pandas as pd
-from datetime import datetime
+from datetime import datetime,timedelta
+import time
 
 
 # Open the file for reading
@@ -17,7 +18,12 @@ dbname   = contents['DB_NAME']
 coingecko_api_root = contents['COINGECKO_API_ROOT']
 
 
-date='21-03-2023'
+startDate='01-02-2023'
+dateStr = '01-02-2023' 
+date =datetime.strptime(startDate, '%d-%m-%Y')
+
+today=datetime.today().date()
+
 api_endpoint = coingecko_api_root+'coins/bitcoin/history?date=[[date]]&localization=false'
 
 #DB connection
@@ -33,26 +39,40 @@ def get_api_price_history(date,api_endpoint):
     response = requests.get(api_endpoint.replace("[[date]]", date))
     return response.json()
 
-def insert_btc_price_history(currency,date,api_endpoint):
+def price_history_to_df(currency,date,api_endpoint):
     data =get_api_price_history(date,api_endpoint)
     price = data['market_data']['current_price'][currency]
     df = pd.DataFrame(columns=["date", "price", "currency","api_url"])
-    df = df.append({"Date": date, "Price": price, "Currency": currency,"api_url":api_endpoint.replace("[[date]]", date)}, ignore_index=True)
+    df = df.append({"date": date, "price": price, "currency": currency,"api_url":api_endpoint.replace("[[date]]", date)}, ignore_index=True)
     return df
 
 
-#data = get_api_price_history(date,api_endpoint)
-df = insert_btc_price_history('usd',date,api_endpoint)
-
-test= df["Price"].values[0]
+DayCount = today - datetime.strptime(startDate, '%d-%m-%Y').date()  
+DayCount = int(DayCount.total_seconds())/86400
+i=0
 
 mycursor = mydb.cursor()
-sql = "INSERT INTO BTCPrice (date,price,currency,api_url) VALUES (%s,%s,%s,%s)"
-#val = (test,)
-mycursor.execute(sql, (datetime.strptime(df["Date"].values[0], '%d-%m-%Y').date(),test,df["Currency"].values[0],df["api_url"].values[0],))
-mydb.commit()
 
+
+  
+while i < int(DayCount):
+    print('hello')
+    df = price_history_to_df('usd',dateStr,api_endpoint)
+
+    sql = "INSERT INTO BTCPrice (date,price,currency,api_url) VALUES (%s,%s,%s,%s)"
+    #val = (test,)
+    mycursor.execute(sql, (datetime.strptime(df["date"].values[0], '%d-%m-%Y').date(),df["price"].values[0],df["currency"].values[0],df["api_url"].values[0],))
+    mydb.commit()
+    
+    i += 1
+    date= date  + timedelta(days=1)
+    dateStr = date.strftime('%d-%m-%Y')
+    time.sleep(30)
 
 mydb.close()
+
+
+
+
 
 
