@@ -18,8 +18,8 @@ dbname   = contents['DB_NAME']
 coingecko_api_root = contents['COINGECKO_API_ROOT']
 
 
-startDate='01-02-2023'
-dateStr = '01-02-2023' 
+startDate='01-03-2022'
+dateStr = '01-03-2022' 
 date =datetime.strptime(startDate, '%d-%m-%Y')
 
 today=datetime.today().date()
