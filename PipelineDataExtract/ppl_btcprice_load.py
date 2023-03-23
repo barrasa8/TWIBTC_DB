@@ -1,3 +1,4 @@
+import os
 import requests
 import mysql.connector
 import json
@@ -5,6 +6,9 @@ import pandas as pd
 from datetime import datetime,timedelta
 import time
 
+#Change directory to executed file directory
+script_dir = os.path.dirname(os.path.abspath(__file__))
+os.chdir(script_dir)
 
 # Open the file for reading
 with open('../credentials.json', 'r') as f:
@@ -17,6 +21,13 @@ password = contents['DB_PASSWORD']
 dbname   = contents['DB_NAME']
 coingecko_api_root = contents['COINGECKO_API_ROOT']
 
+#DB connection
+mydb = mysql.connector.connect(
+  host="localhost",
+  user=username,
+  password=password,
+  database=dbname
+)
 
 startDate='01-03-2022'
 dateStr = '01-03-2022' 
