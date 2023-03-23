@@ -22,6 +22,8 @@ dbname   = contents['DB_NAME']
 alphavantage_api_key = contents['ALPHAVANTAGE_API_KEY']
 alphavantage_api_root = contents['ALPHAVANTAGE_API_ROOT']
 
+api_endpoint = alphavantage_api_root+'function=FX_DAILY&outputsize=compact&from_symbol=[[from_symbol]]&to_symbol=[[to_symbol]]&apikey='+alphavantage_api_key
+
 #DB connection
 mydb = mysql.connector.connect(
   host="localhost",
@@ -30,9 +32,26 @@ mydb = mysql.connector.connect(
   database=dbname
 )
 
-# replace the "demo" apikey below with your own key from https://www.alphavantage.co/support/#api-key
-url = alphavantage_api_root+'function=FX_DAILY&outputsize=compact&from_symbol=AUD&to_symbol=USD&apikey='+alphavantage_api_key
-r = requests.get(url)
-data = r.json()
+def get_api_price_history(from_symbol,to_symbol,api_endpoint):
+    response = requests.get(api_endpoint.replace("[[from_symbol]]", from_symbol).replace("[[to_symbol]]", to_symbol))
+    return response.json()
 
-print(data)
+def price_history_to_df(from_symbol,to_symbol,api_endpoint):
+    data =get_api_price_history(from_symbol,to_symbol,api_endpoint)
+    # price = data['market_data']['current_price'][currency]
+    # df = pd.DataFrame(columns=["date", "from_currency", "to_currency",'open', 'high', 'low', 'close',"api_url"])
+    # df = df.append({"date": date,"price": price,"currency": currency,"api_url":api_endpoint.replace("[[date]]", date)},ignore_index=True)
+    #data = data['Meta Data']['Time Series FX (Daily)']
+    return data#df
+
+
+df = price_history_to_df('AUD','USD',api_endpoint)
+
+# # replace the "demo" apikey below with your own key from https://www.alphavantage.co/support/#api-key
+# url = alphavantage_api_root+'function=FX_DAILY&outputsize=compact&from_symbol=AUD&to_symbol=USD&apikey='+alphavantage_api_key
+# r = requests.get(url)
+# data = r.json()
+
+# print(data)
+
+print("end")
